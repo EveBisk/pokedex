@@ -1,5 +1,0 @@
-package apiHelpers
-
-func CommandMap() {
-
-}

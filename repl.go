@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"github.com/EveBisk/pokedex/internal/apiHelpers"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(conf *config) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -30,35 +28,17 @@ func getCommands() map[string]cliCommand {
 		"map": {
 			name:        "map",
 			description: "Displays the names of 20 location areas",
-			callback:    apiHelpers.CommandMap,
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "map",
+			description: "Displays the names of 20 location areas",
+			callback:    commandMapBack,
 		},
 	}
 }
 
-func commandExit() error {
-	fmt.Printf("Closing the Pokedex... Goodbye!\n")
-	os.Exit(0)
-
-	return nil
-}
-
-func commandHelp() error {
-	fmt.Printf("Welcome to the Pokedex!\nUsage:\n\n")
-	registry := getCommands()
-
-	for _, val := range registry {
-		fmt.Printf("%s: %s\n", val.name, val.description)
-	}
-
-	return nil
-}
-
-func commandMap() error {
-
-	return nil
-}
-
-func startRepl() {
+func startRepl(config *config) {
 	reader := bufio.NewScanner(os.Stdin)
 	registry := getCommands()
 
@@ -78,7 +58,7 @@ func startRepl() {
 		if !ok {
 			fmt.Printf("Command not found\n")
 		} else {
-			err := entry.callback()
+			err := entry.callback(config)
 			if err != nil {
 				fmt.Println(err)
 			}
