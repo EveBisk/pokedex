@@ -58,11 +58,8 @@ func (c *Cache) reapLoop(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C: // Triggered at each interval
-			c.cleanUp(interval)
-		}
+	for range ticker.C {
+		c.cleanUp(interval)
 	}
 }
 
