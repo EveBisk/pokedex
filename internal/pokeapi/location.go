@@ -7,12 +7,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) ListLocations(pageURL *string) (LocationAreasResponse, error) {
-	url := baseURL + "/location-area"
-
-	if pageURL != nil {
-		url = *pageURL
-	}
+func (c *Client) ListLocations(url string) (LocationAreasResponse, error) {
 
 	res, err := http.Get(url)
 
@@ -36,4 +31,14 @@ func (c *Client) ListLocations(pageURL *string) (LocationAreasResponse, error) {
 
 	return locations_response, nil
 
+}
+
+func GetLocationURL(pageURL *string) string {
+	url := baseURL + "location-area?offset=0&limit=20"
+
+	if pageURL != nil {
+		url = *pageURL
+	}
+
+	return url
 }

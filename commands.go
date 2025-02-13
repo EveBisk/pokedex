@@ -1,11 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 
-	pokeapi "github.com/EveBisk/pokedex/internal/pokeapi"
+	"github.com/EveBisk/pokedex/internal/pokeapi"
 )
 
 func commandExit(reg *config) error {
@@ -26,11 +27,20 @@ func commandHelp(reg *config) error {
 	return nil
 }
 
-func commandMap(reg *config) error {
-	pageUrl := reg.nextLocationsURL
+func commandMap(cfg *config) error {
+	url := pokeapi.GetLocationURL(cfg.nextLocationsURL)
 
-	client := pokeapi.NewClient()
-	locations_response, err := client.ListLocations(pageUrl)
+	var locations_response pokeapi.LocationAreasResponse
+	var err error
+
+	entries, exist := cfg.pokeapiCache.Get(url)
+
+	if exist {
+		err = json.Unmarshal(entries, &locations_response)
+
+	} else {
+		locations_response, err = cfg.pokeapiClient.ListLocations(url)
+	}
 
 	if err != nil {
 		return err
@@ -40,21 +50,34 @@ func commandMap(reg *config) error {
 		fmt.Println(entry.Name)
 	}
 
-	reg.prevLocationsURL = locations_response.Previous
-	reg.nextLocationsURL = locations_response.Next
+	cfg.prevLocationsURL = locations_response.Previous
+	cfg.nextLocationsURL = locations_response.Next
+
+	b, err := json.Marshal(locations_response)
+	if err != nil {
+		return err
+	}
+
+	cfg.pokeapiCache.Add(url, b)
 
 	return nil
 }
 
-func commandMapBack(reg *config) error {
-	if reg.prevLocationsURL == nil {
+func commandMapBack(cfg *config) error {
+	if cfg.prevLocationsURL == nil {
 		return errors.New("you're on the first page")
 	}
 
-	pageUrl := reg.prevLocationsURL
+	var locations_response pokeapi.LocationAreasResponse
+	var err error
 
-	client := pokeapi.NewClient()
-	locations_response, err := client.ListLocations(pageUrl)
+	entries, exist := cfg.pokeapiCache.Get(*cfg.prevLocationsURL)
+
+	if exist {
+		err = json.Unmarshal(entries, &locations_response)
+	} else {
+		locations_response, err = cfg.pokeapiClient.ListLocations(*cfg.prevLocationsURL)
+	}
 
 	if err != nil {
 		return err
@@ -64,8 +87,8 @@ func commandMapBack(reg *config) error {
 		fmt.Println(entry.Name)
 	}
 
-	reg.prevLocationsURL = locations_response.Previous
-	reg.nextLocationsURL = locations_response.Next
+	cfg.prevLocationsURL = locations_response.Previous
+	cfg.nextLocationsURL = locations_response.Next
 
 	return nil
 }
