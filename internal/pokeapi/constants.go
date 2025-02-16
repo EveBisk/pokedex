@@ -4,7 +4,7 @@ const baseURL = "https://pokeapi.co/api/v2/"
 const exploreLocationURL = "https://pokeapi.co/api/v2/location-area/"
 const pokemonURL = "https://pokeapi.co/api/v2/pokemon/"
 
-type PokemonResponse []string
+type PokemonsInLocation []string
 
 type LocationAreasResponse struct {
 	Count    int     `json:"count"`
@@ -69,12 +69,17 @@ type namedLocationAreaAPIResponse struct {
 	} `json:"pokemon_encounters"`
 }
 
+type PokemonResponse struct {
+	Pokemon PokemonInfo
+	BaseExp int
+}
+
 type PokemonStats struct {
 	BaseStat int    `json:"base_stat"`
 	Name     string `json:"name"`
 }
 
-type Pokemon struct {
+type PokemonInfo struct {
 	Name   string
 	Height int
 	Weight int

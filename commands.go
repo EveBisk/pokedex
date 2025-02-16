@@ -98,7 +98,7 @@ func commandMapBack(cfg *config, arg string) error {
 func commandExplore(cfg *config, name string) error {
 	fmt.Printf("Exploring %s...\n", name)
 
-	var response pokeapi.PokemonResponse
+	var response pokeapi.PokemonsInLocation
 	var err error
 
 	cache := cfg.pokeapiCache
@@ -133,21 +133,38 @@ func commandExplore(cfg *config, name string) error {
 func commandCatch(cfg *config, name string) error {
 	fmt.Printf("Throwing a Pokeball at %s...\n", name)
 
+	var pokemonResponse pokeapi.PokemonResponse
+	var err error
+
+	cache := cfg.pokeapiCache
+	value, exist := cache.Get(name)
+
+	if exist {
+		err = json.Unmarshal(value, &pokemonResponse)
+	} else {
+		pokemonResponse, err = cfg.pokeapiClient.GetPokemonBaseExperience(name)
+	}
+
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	dice_roll := r.Intn(100)
-
-	poke_exp, pokemon, err := cfg.pokeapiClient.GetPokemonBaseExperience(name)
 
 	if err != nil {
 		return err
 	}
 
-	if dice_roll > poke_exp {
+	if dice_roll > pokemonResponse.BaseExp {
 		fmt.Printf("%s was caught!\n", name)
-		cfg.pokedex[name] = pokemon
+		cfg.pokedex[name] = pokemonResponse.Pokemon
 	} else {
 		fmt.Printf("%s escaped!\n", name)
 	}
+
+	b, err := json.Marshal(pokemonResponse)
+	if err != nil {
+		return err
+	}
+
+	cfg.pokeapiCache.Add(name, b)
 
 	return nil
 }
