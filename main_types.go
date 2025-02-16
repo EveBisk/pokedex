@@ -10,4 +10,5 @@ type config struct {
 	pokeapiCache     *pokecache.Cache
 	nextLocationsURL *string
 	prevLocationsURL *string
+	pokedex          map[string]pokeapi.Pokemon
 }
