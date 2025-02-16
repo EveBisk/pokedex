@@ -39,5 +39,27 @@ func (c *Client) GetPokemonBaseExperience(name string) (int, Pokemon, error) {
 		return 0, Pokemon{}, err
 	}
 
-	return pokemon_response.BaseExperience, pokemon_response.Pokemon, nil
+	stats := []PokemonStats{}
+	types := []string{}
+
+	for _, entry := range pokemon_response.Stats {
+		stats = append(stats, PokemonStats{
+			Name:     entry.Stat.Name,
+			BaseStat: entry.BaseStat,
+		})
+	}
+
+	for _, entry := range pokemon_response.Types {
+		types = append(types, entry.Type.Name)
+	}
+
+	pokemon := Pokemon{
+		Name:   pokemon_response.Name,
+		Height: pokemon_response.Height,
+		Weight: pokemon_response.Weight,
+		Stats:  stats,
+		Types:  types,
+	}
+
+	return pokemon_response.BaseExperience, pokemon, nil
 }

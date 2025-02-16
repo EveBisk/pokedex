@@ -69,7 +69,20 @@ type namedLocationAreaAPIResponse struct {
 	} `json:"pokemon_encounters"`
 }
 
+type PokemonStats struct {
+	BaseStat int    `json:"base_stat"`
+	Name     string `json:"name"`
+}
+
 type Pokemon struct {
+	Name   string
+	Height int
+	Weight int
+	Stats  []PokemonStats
+	Types  []string
+}
+
+type pokemonAPIResponse struct {
 	Name   string `json:"name"`
 	Height int    `json:"height"`
 	Weight int    `json:"weight"`
@@ -88,10 +101,6 @@ type Pokemon struct {
 			URL  string `json:"url"`
 		} `json:"type"`
 	} `json:"types"`
-}
-
-type pokemonAPIResponse struct {
-	Pokemon
 	ID             int  `json:"id"`
 	BaseExperience int  `json:"base_experience"`
 	IsDefault      bool `json:"is_default"`
